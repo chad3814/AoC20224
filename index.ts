@@ -35,7 +35,7 @@ async function main() {
             process.exit(1);
         }
     } catch (err) {
-        console.error(`No imput for day ${day} problem`);
+        console.error(`No input for day ${day} problem`);
         process.exit(1);
     }
 }

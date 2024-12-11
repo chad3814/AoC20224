@@ -15,7 +15,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
-    "aoc-copilot": "^1.6.3",
+    "aoc-copilot": "^1.6.5",
     "dot-env": "^0.0.1"
   }
 }

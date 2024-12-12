@@ -1,5 +1,5 @@
 import { NotImplemented, run } from "aoc-copilot";
-import { dForward, dIndex, Direction, dLeft, filterGraph, Graph, GraphNode, graphReset, make2dGraph, turnLeft, turnRight } from "./list-graph";
+import { dForward, dIndex, Direction, dLeft, filterGraph, Graph, GraphNode, graphReset, make2dGraph, turnLeft, turnRight } from "../utils/list-graph";
 
 type AdditionalInfo = {
     [key: string]: string;

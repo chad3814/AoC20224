@@ -1,5 +1,5 @@
 import { NotImplemented, run } from "aoc-copilot";
-import { memoize } from "./memoize";
+import { memoize } from "../utils/memoize";
 
 type AdditionalInfo = {
     [key: string]: string;

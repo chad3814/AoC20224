@@ -292,6 +292,10 @@ export type GraphNode<T> = Omit<Node<T>, 'next'|'prev'|'linkedList'>  & {
     nodes: GraphNode<T>[];
     x: number;
     y: number;
+    north?: GraphNode<T>,
+    east?: GraphNode<T>,
+    south?: GraphNode<T>,
+    west?: GraphNode<T>,
 };
 
 export type Graph<T> = {
@@ -354,7 +358,11 @@ export function make2dGraph<T>(
                 const offset = DIRECTION_OFFSETS[direction];
                 const x2 = x + offset[0];
                 const y2 = y + offset[1];
-
+                const directionKey = direction === Direction.NORTH ?
+                    'north' : direction === Direction.EAST ?
+                    'east' : direction === Direction.SOUTH ?
+                    'south' :
+                    'west';
                 if (
                     y2 < 0 || y2 >= values.length ||
                     x2 < 0 || x2 >= values[y].length
@@ -379,6 +387,7 @@ export function make2dGraph<T>(
                     direction
                 )) {
                     node1.nodes.push(node2);
+                    node1[directionKey] = node2;
                 }
             }
             graph.allNodes.set(node1.value, node1);

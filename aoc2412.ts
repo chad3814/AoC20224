@@ -1,5 +1,5 @@
 import { NotImplemented, run } from "aoc-copilot";
-import { filterGraph, Graph, GraphNode, graphReset, make2dGraph } from "./list-graph";
+import { Direction, filterGraph, Graph, GraphNode, graphReset, make2dGraph } from "./list-graph";
 import { inspect } from "util";
 
 type AdditionalInfo = {
@@ -41,8 +41,34 @@ function getPerimeter(plot: GraphNode<string>[]): number {
     return count;
 }
 
-function getSides(plot: GraphNode<string>[]): number {
+function dKey(direction: Direction): 'north'|'east'|'south'|'west' {
+    if (direction === Direction.NORTH) return 'north';
+    if (direction === Direction.EAST) return 'east';
+    if (direction === Direction.SOUTH) return 'south';
+    return 'west';
+}
 
+function getSides(node: GraphNode<string>): number {
+    let sides = 1;
+    let direction = Direction.EAST;
+    const startX = node.x;
+    const startY = node.y;
+    let x = node.x;
+    let y = node.y;
+
+    do {
+        while(node[dKey(direction)]) {
+            node = node[dKey(direction)]!;
+            x = node.x;
+            y = node.y;
+        }
+        direction = direction === Direction.EAST ?
+            Direction.SOUTH : direction === Direction.SOUTH ?
+            Direction.WEST : direction === Direction.WEST ?
+            Direction.NORTH : Direction.EAST;
+        sides++;
+    } while(x !== startX || y !== startY || direction !== Direction.EAST);
+    return sides;
 }
 
 export async function solve(
@@ -84,7 +110,8 @@ export async function solve(
     let cost = 0;
     for (const plot of map.values()) {
         const area = getArea(plot);
-        const sides = getSides(plot);
+        const sides = getSides(plot[0]);
+        console.log(plot[0].value, sides);
         cost += area * sides;
     }
     return cost;

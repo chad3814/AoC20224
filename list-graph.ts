@@ -290,6 +290,8 @@ const DIRECTION_OFFSETS: NorthOffset&EastOffset&SouthOffset&WestOffset = {
 
 export type GraphNode<T> = Omit<Node<T>, 'next'|'prev'|'linkedList'>  & {
     nodes: GraphNode<T>[];
+    x: number;
+    y: number;
 };
 
 export type Graph<T> = {
@@ -311,17 +313,24 @@ export function makeGraph<T>(nodes?: Iterable<GraphNode<T>>): Graph<T> {
     };
 }
 
-export function graphNode<T>(value: T): GraphNode<T> {
+export function graphNode<T>(value: T, x: number, y: number): GraphNode<T> {
     return {
         value,
         visited: false,
         nodes: [],
+        x, y,
     };
+}
+
+export function graphReset<T>(graph: Graph<T>) {
+    for (const node of graph.allNodes.values()) {
+        node.visited = false;
+    }
 }
 
 export function make2dGraph<T>(
     values: string[][] | string[],
-    getValue: (v: string) => T,
+    getValue: (v: string, x: number, y: number) => T,
     joinFunc: (a: T, b: T, x1: number, y1: number, x2: number, y2: number, direction: Direction) => boolean
 ): Graph<T> {
     const graph = makeGraph<T>();
@@ -334,9 +343,10 @@ export function make2dGraph<T>(
             let node1: GraphNode<T> = nodes[y][x]!;
             if(!node1) {
                 node1 = {
-                    value: getValue(values[y][x]),
+                    value: getValue(values[y][x], x, y),
                     visited: false,
                     nodes: [],
+                    x, y,
                 };
             }
             nodes[y][x] = node1;
@@ -355,9 +365,10 @@ export function make2dGraph<T>(
                 let node2: GraphNode<T> = nodes[y2][x2]!;
                 if (!node2) {
                     node2 = {
-                        value: getValue(values[y2][x2]),
+                        value: getValue(values[y2][x2], x2, y2),
                         visited: false,
                         nodes: [],
+                        x: x2, y: y2,
                     }
                 }
                 nodes[y2][x2] = node2;

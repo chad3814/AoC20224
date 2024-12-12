@@ -1,46 +1,42 @@
 import { NotImplemented, run } from "aoc-copilot";
+import { memoize } from "./memoize";
 
 type AdditionalInfo = {
     [key: string]: string;
 };
 
-function transform(x: number): number[] {
-    if (transform.map.has(x)) {
-        return transform.map.get(x)!;
-    }
+const transform = memoize((x: number): [number] | [number, number] => {
     if (x === 0) {
         return [1];
     }
-    const y = x.toString(10);
-    if (y.length % 2 === 0) {
-        const z = [parseInt(y.substring(0, y.length / 2)), parseInt(y.substring(y.length / 2))];
-        transform.map.set(x, z);
-        return z;
+
+    const digits = Math.floor(Math.log10(x)) + 1;
+    if (digits % 2 === 0) {
+        const midpoint = digits / 2;
+        const tens = 10**midpoint;
+        return [Math.floor(x / tens), x % tens];
     }
-    transform.map.set(x, [x*2024]);
+
     return [x * 2024];
-}
-transform.map = new Map<number,number[]>();
+});
+
+const transformBlinks = memoize((stone: number, blinks: number): number => {
+    if (blinks === 0) {
+        return 0;
+    }
+    const stones = transform(stone);
+    if (blinks === 1) {
+        return stones.length;
+    }
+    const counts = stones.map(s => transformBlinks(s, blinks - 1));
+    return counts.reduce((a, b) => a + b, 0);
+});
 
 
 function bothParts(stones: number[], blinks: number): number {
-    let map = new Map<number, number>();
-    for (const stone of stones) {
-        map.set(stone, (map.get(stone) ?? 0) + 1);
-    }
-    for (let i = 0; i < blinks; i++) {
-        const blinkMap = new Map<number, number>();
-        for (const [stone, amount] of map.entries()) {
-            const newStones = transform(stone);
-            for (const newStone of newStones) {
-                blinkMap.set(newStone, (blinkMap.get(newStone) ?? 0) + amount);
-            }
-        }
-        map = blinkMap;
-    }
     let count = 0;
-    for (const amount of map.values()) {
-        count += amount;
+    for (const stone of stones) {
+        count += transformBlinks(stone, blinks);
     }
     return count;
 }
@@ -58,4 +54,4 @@ export async function solve(
     return bothParts(stones, 75);
 }
 
-run(__filename, solve);
+run(__filename, solve, {skipTests: true});

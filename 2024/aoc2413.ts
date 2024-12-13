@@ -11,41 +11,6 @@ type Machine = {
     prize: [number, number];
 };
 
-function getMultiples(target: number, value: number): number[] {
-    const num = Math.floor(target / value);
-    const ret = [];
-    for (let i = 0; i <= num; i++) {
-        ret.push(i*value);
-    }
-    return ret;
-}
-
-function combos(a: number[], b: number[], target: number): [number, number][] {
-    const ret: [number, number][] = [];
-    for (let i = 0; i < a.length; i++) {
-        for (let j = 0; j < b.length; j++) {
-            if (a[i] + b[j] === target) {
-                // console.log('a:', a[i], '-', i, 'b:', b[j], '-', j, 'target:', target, a[i] + b[j]);
-                ret.push([i, j]);
-            }
-        }
-    }
-    return ret;
-}
-
-function offsetCombos(a: number[], b: number[], aBase: number, bBase: number, target: number): [number, number][] {
-    const ret: [number, number][] = [];
-    for (let i = 0; i < a.length; i++) {
-        for (let j = 0; j < b.length; j++) {
-            if (a[i] + b[j] + aBase + bBase === target) {
-                // console.log('a:', a[i], '-', i, 'b:', b[j], '-', j, 'target:', target, a[i] + b[j]);
-                ret.push([i, j]);
-            }
-        }
-    }
-    return ret;
-}
-
 export async function solve(
     input: string[],
     part: number,
@@ -76,62 +41,61 @@ export async function solve(
             });
         }
     }
-    if (part === 1) {
-        let cost = 0;
-        for (const machine of machines) {
-            const aXMults = getMultiples(machine.prize[0], machine.a[0]);
-            const bXMults = getMultiples(machine.prize[0], machine.b[0]);
-            // console.log('aXs:', aXMults, 'bXs:', bXMults);
-            const xCombos = combos(aXMults, bXMults, machine.prize[0]).filter(
-                ([a, b]) => machine.a[1] * a + machine.b[1] * b  === machine.prize[1]
-            );
-            // console.log('combos:', xCombos);
-            if (xCombos.length === 0) {
-                console.log('no combo for', machine);
-                continue;
-            }
 
-            const costs = xCombos.map(
-                ([a, b]) => a * 3 + b
-            );
-
-            const min = Math.min(...costs);
-            console.log(min, 'for machine', machine);
-            cost += min;
-        }
-        return cost;
-    }
-    let cost = 0;
+    let cost = BigInt(0);
     for (const machine of machines) {
-        const aMult = Math.ceil(10000000000000 / machine.a[0]);
-        const aBase = aMult * machine.a[0];
-        const aOffset = aBase - 10000000000000;
-        const aMults = getMultiples(machine.prize[0] - aOffset, machine.a[0]);
-        const bMult = Math.ceil(10000000000000 / machine.b[0]);
-        const bBase = bMult * machine.b[0];
-        const bOffset = bBase - 10000000000000;
-        const bMults = getMultiples(machine.prize[0] - bOffset, machine.b[0]);
-        const xCombos = offsetCombos(
-            aMults, bMults,
-            aBase, bBase,
-            machine.prize[0] + 10000000000000)
-        .filter(
-            ([a, b]) => machine.a[1] * (aMult + a) + machine.b[1] * (bMult + b) === machine.prize[1]
-        );
-        if (xCombos.length === 0) {
-            continue;
+        // Button A: X+26, Y+66
+        // Button B: X+67, Y+21
+        // Prize: X=10000000012748, Y=10000000012176
+        // 26a + 67b = 10000000012748
+        // 66a + 21b = 10000000012176
+        // i=26, j= 67, k=66, l=21
+        // ai + bj = prizeX
+        // ak + bl = prizeY
+        // a = (prizeX - bj)/i
+        // b = (prizeY - ak)/l
+        // a = (prizeX - j(prizeY - ak)/l)/i
+        // ai = prizeX - j(prizeY - ak)/l
+        // ai = prizeX - jprizeY/l + ajk/l
+        // a(i - jk/l) = prizeX - jprizeY/l
+        // a = (prizeX - jprizeY/l)/(i - jk/l);
+
+        /*
+            l*prizeX - j*prizeY
+        a = -------------------
+                l*i - j*k
+        */
+        const i = BigInt(machine.a[0]);
+        const j = BigInt(machine.b[0]);
+        const k = BigInt(machine.a[1]);
+        const l = BigInt(machine.b[1]);
+        const prizeX = BigInt(machine.prize[0] + (part === 1 ? 0 : 10000000000000));
+        const prizeY = BigInt(machine.prize[1] + (part === 1 ? 0 : 10000000000000));
+
+        const numerator1 = l * prizeX - j * prizeY;
+        const denominator1 = l * i - j * k;
+        if (0n === numerator1 % denominator1) {
+            const a = numerator1 / denominator1;
+            const numerator2 = prizeY - a * k;
+            const denominator2 = l;
+            if (0n === numerator2 % denominator2) {
+                const b = numerator2 / denominator2;
+                cost += 3n * a + b;
+            }
         }
-
-        const costs = xCombos.map(
-            ([a, b]) => (a + aMult) * 3 + b + bMult
-        );
-
-        const min = Math.min(...costs);
-        console.log(min, 'for machine', machine);
-        cost += min;
     }
-    return cost;
-    throw new NotImplemented('Not Implemented');
+    return cost.toString(10);
 }
 
-run(__filename, solve, {skipTests: true});
+run(__filename, solve, {testsOnly: true}, {
+    "reason": "Multiple examples",
+    "part1length": 1,
+    "inputs": {
+        "selector": "code",
+        "indexes": [8, 8]
+    },
+    "answers": {
+        "selector": "code",
+        "indexesOrLiterals": [43, "875318608908"]
+    }
+});

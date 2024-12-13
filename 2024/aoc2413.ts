@@ -33,6 +33,19 @@ function combos(a: number[], b: number[], target: number): [number, number][] {
     return ret;
 }
 
+function offsetCombos(a: number[], b: number[], aBase: number, bBase: number, target: number): [number, number][] {
+    const ret: [number, number][] = [];
+    for (let i = 0; i < a.length; i++) {
+        for (let j = 0; j < b.length; j++) {
+            if (a[i] + b[j] + aBase + bBase === target) {
+                // console.log('a:', a[i], '-', i, 'b:', b[j], '-', j, 'target:', target, a[i] + b[j]);
+                ret.push([i, j]);
+            }
+        }
+    }
+    return ret;
+}
+
 export async function solve(
     input: string[],
     part: number,
@@ -59,7 +72,7 @@ export async function solve(
             machines.push({
                 a,
                 b,
-                prize: [10000000000000 + parseInt(match.groups.x, 10), 10000000000000 + parseInt(match.groups.y, 10)],
+                prize: [parseInt(match.groups.x, 10), parseInt(match.groups.y, 10)],
             });
         }
     }
@@ -88,7 +101,37 @@ export async function solve(
         }
         return cost;
     }
+    let cost = 0;
+    for (const machine of machines) {
+        const aMult = Math.ceil(10000000000000 / machine.a[0]);
+        const aBase = aMult * machine.a[0];
+        const aOffset = aBase - 10000000000000;
+        const aMults = getMultiples(machine.prize[0] - aOffset, machine.a[0]);
+        const bMult = Math.ceil(10000000000000 / machine.b[0]);
+        const bBase = bMult * machine.b[0];
+        const bOffset = bBase - 10000000000000;
+        const bMults = getMultiples(machine.prize[0] - bOffset, machine.b[0]);
+        const xCombos = offsetCombos(
+            aMults, bMults,
+            aBase, bBase,
+            machine.prize[0] + 10000000000000)
+        .filter(
+            ([a, b]) => machine.a[1] * (aMult + a) + machine.b[1] * (bMult + b) === machine.prize[1]
+        );
+        if (xCombos.length === 0) {
+            continue;
+        }
+
+        const costs = xCombos.map(
+            ([a, b]) => (a + aMult) * 3 + b + bMult
+        );
+
+        const min = Math.min(...costs);
+        console.log(min, 'for machine', machine);
+        cost += min;
+    }
+    return cost;
     throw new NotImplemented('Not Implemented');
 }
 
-run(__filename, solve);
+run(__filename, solve, {skipTests: true});

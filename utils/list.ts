@@ -260,3 +260,17 @@ export function llToString<T>(list: LinkedList<T>, separator = ','): string {
     }
     return str;
 }
+
+export function* llListNode<T>(list: LinkedList<T>): Generator<Node<T>> {
+    let node = list.head;
+    while (node !== null) {
+        yield node;
+        node = node.next;
+    }
+}
+
+export function* llList<T>(list: LinkedList<T>): Generator<T> {
+    for (const node of llListNode(list)) {
+        yield node.value;
+    }
+}

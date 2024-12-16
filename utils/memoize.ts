@@ -1,17 +1,31 @@
 type Params =readonly unknown[];
 
-export function memoize<T extends Params, R>(
-    func: (...args: T) => R
-) {
-    const map = new Map<string, R>();
-    return (...args: T) => {
-        const key = args.join(':');
-        let ret = map.get(key);
-        if (ret) {
+function key(x: any): string {
+    const s = String(x);
+    if (typeof x !== 'object') return s;
+    if (Array.isArray(x)) return '[' + x.map(key).join(',') + ']';
+    if (!s.startsWith('[object ')) return s;
+    let entries = Object.entries(x);
+    if (x.entries) {
+        entries = x.entries();
+    }
+    return '{' + [...entries].map(key).join(';') + '}';
+}
+
+export function memoize<This, T extends Params, R>(
+    numArg = Number.POSITIVE_INFINITY
+): (func: (...args: T)=>R) => (this: This, ...args: T) => R {
+    return (func: (...args: T) => R) => {
+        const map = new Map<string, R>();
+        return function(this: This, ...args: T) {
+            const k = key(args.slice(0, numArg));
+            let ret = map.get(k);
+            if (ret) {
+                return ret;
+            }
+            ret = func.call(this, ...args);
+            map.set(k, ret);
             return ret;
         }
-        ret = func(...args);
-        map.set(key, ret);
-        return ret;
     }
 }

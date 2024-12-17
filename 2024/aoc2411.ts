@@ -5,7 +5,7 @@ type AdditionalInfo = {
     [key: string]: string;
 };
 
-const transform = memoize((x: number): [number] | [number, number] => {
+const _transform = (x: number): [number] | [number, number] => {
     if (x === 0) {
         return [1];
     }
@@ -18,9 +18,11 @@ const transform = memoize((x: number): [number] | [number, number] => {
     }
 
     return [x * 2024];
-});
+}
 
-const transformBlinks = memoize((stone: number, blinks: number): number => {
+const transform = memoize<void, Parameters<typeof _transform>, ReturnType<typeof _transform>>(1)(_transform);
+
+const _transformBlinks = (stone: number, blinks: number): number => {
     if (blinks === 0) {
         return 0;
     }
@@ -30,7 +32,9 @@ const transformBlinks = memoize((stone: number, blinks: number): number => {
     }
     const counts = stones.map(s => transformBlinks(s, blinks - 1));
     return counts.reduce((a, b) => a + b, 0);
-});
+};
+
+const transformBlinks = memoize<void, Parameters<typeof _transformBlinks>, ReturnType<typeof _transformBlinks>>(2)(_transformBlinks);
 
 
 function bothParts(stones: number[], blinks: number): number {

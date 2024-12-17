@@ -1,22 +1,6 @@
+import { Direction, Turn } from "./direction";
 import { memoize } from "./memoize";
-
-export enum Direction {
-    NORTH = 0,
-    UP = 0,
-    EAST = 1,
-    RIGHT = 1,
-    SOUTH = 2,
-    DOWN = 2,
-    WEST = 3,
-    LEFT = 3,
-};
-
-export enum Turn {
-    LEFT = 0,
-    RIGHT = 1,
-    STRAIGHT = 2,
-    UTURN = 3,
-};
+import { Path, Point } from "./point";
 
 function getTurns(p1: Point, p2: Point, p3: Point): Turn[] {
     if (p1.x === p2.x && p2.x === p3.x) {
@@ -49,43 +33,6 @@ function getTurns(p1: Point, p2: Point, p3: Point): Turn[] {
     }
     return dir1 === Direction.RIGHT ? [Turn.RIGHT, Turn.STRAIGHT] : [Turn.LEFT, Turn.STRAIGHT];
 }
-
-export class Point {
-    public static p(x: number, y: number) {
-        let p = this.points.get(`${x}-${y}`);
-        if (p) return p;
-        p = new Point(x, y);
-        this.points.set(`${x}-${y}`, p);
-        return p;
-    }
-
-    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0): Point[] {
-        const points: Point[] = [];
-        if (this.x > minX) {
-            points.push(Point.p(this.x - 1, this.y));
-        }
-        if (this.x < maxX) {
-            points.push(Point.p(this.x + 1, this.y));
-        }
-        if (this.y > minY) {
-            points.push(Point.p(this.x, this.y - 1));
-        }
-        if (this.y < maxY) {
-            points.push(Point.p(this.x, this.y + 1));
-        }
-
-        return points;
-    }
-
-    public toString(): string {
-        return `(${this.x}, ${this.y})`;
-    }
-
-    private constructor(public readonly x: number, public readonly y: number) {}
-    private static points: Map<string, Point> = new Map<string, Point>();
-}
-
-export type Path = Point[];
 
 export class Graph {
     constructor(input: string[] | string[][], private passable = '.', private impassable = '#') {

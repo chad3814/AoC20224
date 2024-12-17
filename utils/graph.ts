@@ -1,88 +1,5 @@
+import { Direction, DirectionOffset } from "./direction";
 import { LinkedList, llAppend, llAppendList, llDupe, makeLinkedList, Node } from "./list";
-
-export enum Direction {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST
-};
-
-type NorthOffset = {
-    [Direction.NORTH]: [-1|0|1, -1|0|1];
-};
-type EastOffset = {
-    [Direction.EAST]: [-1|0|1, -1|0|1];
-};
-type SouthOffset = {
-    [Direction.SOUTH]: [-1|0|1, -1|0|1];
-};
-type WestOffset = {
-    [Direction.WEST]: [-1|0|1, -1|0|1];
-};
-
-export function dForward(direction: Direction): 'north'|'east'|'south'|'west' {
-    if (direction === Direction.NORTH) return 'north';
-    if (direction === Direction.EAST) return 'east';
-    if (direction === Direction.SOUTH) return 'south';
-    return 'west';
-}
-
-export function dBackward(direction: Direction): 'north'|'east'|'south'|'west' {
-    if (direction === Direction.NORTH) return 'south';
-    if (direction === Direction.EAST) return 'west';
-    if (direction === Direction.SOUTH) return 'north';
-    return 'east';
-}
-
-export function dLeft(direction: Direction): 'north'|'east'|'south'|'west' {
-    if (direction === Direction.NORTH) return 'west';
-    if (direction === Direction.EAST) return 'north';
-    if (direction === Direction.SOUTH) return 'east';
-    return 'south';
-}
-
-export function dRight(direction: Direction): 'north'|'east'|'south'|'west' {
-    if (direction === Direction.NORTH) return 'east';
-    if (direction === Direction.EAST) return 'south';
-    if (direction === Direction.SOUTH) return 'west';
-    return 'north';
-}
-
-export function turnLeft(direction: Direction): Direction {
-    if (direction === Direction.NORTH) return Direction.WEST;
-    if (direction === Direction.EAST) return Direction.NORTH;
-    if (direction === Direction.SOUTH) return Direction.EAST;
-    return Direction.SOUTH;
-}
-
-export function turnRight(direction: Direction): Direction {
-    if (direction === Direction.NORTH) return Direction.EAST;
-    if (direction === Direction.EAST) return Direction.SOUTH;
-    if (direction === Direction.SOUTH) return Direction.WEST;
-    return Direction.NORTH;
-}
-
-export function uTurn(direction: Direction): Direction {
-    if (direction === Direction.NORTH) return Direction.SOUTH;
-    if (direction === Direction.EAST) return Direction.WEST;
-    if (direction === Direction.SOUTH) return Direction.NORTH;
-    return Direction.EAST;
-}
-
-export function dIndex(direction: Direction): 0|1|2|3 {
-    if (direction === Direction.NORTH) return 0;
-    if (direction === Direction.EAST) return 1;
-    if (direction === Direction.SOUTH) return 2;
-    return 3;
-}
-
-
-const DIRECTION_OFFSETS: NorthOffset&EastOffset&SouthOffset&WestOffset = {
-    [Direction.NORTH]: [0, -1],
-    [Direction.EAST]: [1, 0],
-    [Direction.SOUTH]: [0, 1],
-    [Direction.WEST]: [-1, 0],
-};
 
 export type GraphNode<T> = Omit<Node<T>, 'next'|'prev'|'linkedList'>  & {
     nodes: GraphNode<T>[];
@@ -151,7 +68,7 @@ export function make2dGraph<T>(
             }
             nodes[y][x] = node1;
             for (const direction of [Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST]) {
-                const offset = DIRECTION_OFFSETS[direction];
+                const offset = DirectionOffset[direction];
                 const x2 = x + offset[0];
                 const y2 = y + offset[1];
                 const directionKey = direction === Direction.NORTH ?

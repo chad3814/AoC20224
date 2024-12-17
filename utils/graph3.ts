@@ -1,60 +1,7 @@
 import { DefaultMap } from "./default-map";
+import { Direction, OppositeDirection } from "./direction";
 import { LinkedList } from "./list-class";
-
-export enum Direction {
-    NORTH = 0,
-    UP = 0,
-    EAST = 1,
-    RIGHT = 1,
-    SOUTH = 2,
-    DOWN = 2,
-    WEST = 3,
-    LEFT = 3,
-};
-
-const OPPOSITES = {
-    [Direction.NORTH]: Direction.SOUTH,
-    [Direction.EAST]: Direction.WEST,
-    [Direction.SOUTH]: Direction.NORTH,
-    [Direction.WEST]: Direction.EAST,
-};
-
-export class Point {
-    public static p(x: number, y: number) {
-        let p = this.points.get(`${x}-${y}`);
-        if (p) return p;
-        p = new Point(x, y);
-        this.points.set(`${x}-${y}`, p);
-        return p;
-    }
-
-    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0): Point[] {
-        const points: Point[] = [];
-        if (this.x > minX) {
-            points.push(Point.p(this.x - 1, this.y));
-        }
-        if (this.x < maxX) {
-            points.push(Point.p(this.x + 1, this.y));
-        }
-        if (this.y > minY) {
-            points.push(Point.p(this.x, this.y - 1));
-        }
-        if (this.y < maxY) {
-            points.push(Point.p(this.x, this.y + 1));
-        }
-
-        return points;
-    }
-
-    public toString(): string {
-        return `(${this.x}, ${this.y})`;
-    }
-
-    private constructor(public readonly x: number, public readonly y: number) {}
-    private static points: Map<string, Point> = new Map<string, Point>();
-}
-
-export type Path = Point[];
+import { Point } from "./point";
 
 export type MazeNode = {
     facing: Direction;
@@ -117,7 +64,7 @@ export function parseMaze(lines: string[], impassable = '#'): LinkedList<MazeNod
                         node: exitNode.value,
                         cost: 1,
                     });
-                } else if (OPPOSITES[facing] === exiting) {
+                } else if (OppositeDirection[facing] === exiting) {
                     node.exits.push({
                         node: exitNode.value,
                         cost: 2001,

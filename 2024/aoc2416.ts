@@ -1,5 +1,6 @@
 import { NotImplemented, run } from "aoc-copilot";
-import { Direction, Graph, Turn, turnsFromPath } from "../utils/graph2";
+import { Graph, turnsFromPath } from "../utils/graph2";
+import { Direction, Turn } from "../utils/direction";
 
 type AdditionalInfo = {
     [key: string]: string;

@@ -132,26 +132,6 @@ export class Graph {
         return paths;
     }
 
-    @memoize(2)
-    public cheapestPath(p1: Point, p2: Point, costFunc: (path: Path, p: Point) => number, visited: Set<Point> = new Set(), path: Path = []): Path {
-        let pathFromHere: Path = [p1];
-        let cost = Number.POSITIVE_INFINITY;
-        if (p1 === p2) {
-            return pathFromHere;
-        }
-        visited.add(p1);
-        for (const p3 of p1.adjacentPoints(this.width, this.height)) {
-            if (this.grid[p3.y][p3.x] !== this.impassable && !visited.has(p3)) {
-                const c = costFunc([...path, p1], p3);
-                if (c < cost) {
-                    cost = c;
-                    pathFromHere = this.cheapestPath(p3, p2, costFunc, visited, [...path, p1]);
-                }
-            }
-        }
-        return pathFromHere;
-    }
-
     print(valueMap: (value: string, p: Point)=>string = v=>v): void {
         for (let y = 0; y < this.grid.length; y++) {
             const line: string[] = [];
@@ -171,6 +151,9 @@ export class Graph {
 
 export const turnsFromPath = memoize<void, [Direction, Path], Turn[]>(2)(
     (startingDirection: Direction, path: Path): Turn[] => {
+        if (path.length < 2) {
+            throw new Error('Need two path nodes');
+        }
         const turns: Turn[] = [];
         if (startingDirection === Direction.NORTH) {
             turns.push(...getTurns(Point.p(path[0].x, path[0].y + 1), path[0], path[1]));

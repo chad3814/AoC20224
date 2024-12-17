@@ -203,6 +203,22 @@ export class LinkedList<T> {
         }
     }
 
+    findValue(item: T): Node<T>|null {
+        for (const node of this) {
+            if (node.value === item) return node;
+        }
+        return null;
+    }
+
+    find(predicate: (node: Node<T>) => boolean): Node<T>|null {
+        for (const node of this) {
+            if (predicate(node)) {
+                return node;
+            }
+        }
+        return null;
+    }
+
     toString(separator = ','): string {
         let str = '';
         let first = true;

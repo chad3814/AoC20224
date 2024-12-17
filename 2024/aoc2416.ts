@@ -34,15 +34,12 @@ export async function solve(
         if (!start || !end) {
             throw new Error('missing a poi');
         }
-        const path = graph.cheapestPath(start[0], end[0], (
-            (path, p) => turnsCost(turnsFromPath(Direction.EAST, [...path, p]))
-        ));
-        return turnsCost(turnsFromPath(Direction.EAST, path));
-        // const costs: number[] = [];
-        // console.log('found', paths.length, 'paths');
-        // for (const path of paths) {
-            // console.log('path:', path.join(', '));
-            // const turns = turnsFromPath(Direction.EAST, path);
+        const paths = graph.allPaths(start[0], end[0]);
+        const costs: number[] = [];
+        console.log('found', paths.length, 'paths');
+        for (const path of paths) {
+            // if (test) console.log('path:', path.join(', '));
+            const turns = turnsFromPath(Direction.EAST, path);
             // if (test) graph.print(
             //     (v, p) => {
             //         const i = path.indexOf(p);
@@ -55,20 +52,21 @@ export async function solve(
             //         }
             //     }
             // );
-            // const cost = turns.reduce(
-            //     (total, turn) => {
-            // );
+            const cost = turns.reduce(
+                (total, turn) => {
+                    if (turn === Turn.LEFT || turn === Turn.RIGHT) {
+                        return 1000 + total;
+                    }
+                    if (turn === Turn.UTURN) {
+                        return 2000 + total;
+                    }
+                    return 1 + total;
+                }, 0
+            );
             // if (test) console.log('cost:', cost);
-            // if (test && cost === 7029) console.log('turns:', turns.map(
-            //     t => t === Turn.LEFT ? 'left' :
-            //          t === Turn.RIGHT ? 'right' :
-            //          t === Turn.UTURN ? 'u-turn' :
-            //          'straight'
-            // ));
-
-            // costs.push(cost);
-        // }
-        // return Math.min(...costs);
+            costs.push(cost);
+        }
+        return Math.min(...costs);
     }
     throw new NotImplemented('Not Implemented');
 }

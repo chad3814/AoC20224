@@ -138,7 +138,7 @@ function getSmallest(unvisited: Set<MazeNode>, distances: DefaultMap<MazeNode, n
 export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: MazeNode) {
     const distances = new DefaultMap<MazeNode, number>(Number.POSITIVE_INFINITY);
     const unvisited = new Set<MazeNode>(nodes.values());
-    const previous = new Map<MazeNode, MazeNode>();
+    const previous = new Map<MazeNode, MazeNode[]>();
     distances.set(start, 0);
     while (true) {
         const node = getSmallest(unvisited, distances);
@@ -155,7 +155,10 @@ export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: Maz
             const current = distances.get(exit.node);
             if (distance + exit.cost < current) {
                 distances.set(exit.node, distance + exit.cost);
-                previous.set(exit.node, node);
+                previous.set(exit.node, [node]);
+            } else if (distance + exit.cost === current) {
+                const prevs = previous.get(exit.node)!;
+                prevs.push(node);
             }
         }
         unvisited.delete(node);

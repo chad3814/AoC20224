@@ -39,6 +39,9 @@ export class LinkedList<T> {
         if (this.tail) {
             this.tail.next = node;
         }
+        if (!this.head) {
+            this.head = node;
+        }
         node.prev =this.tail;
         node.next = null;
         this.tail = node;
@@ -55,6 +58,9 @@ export class LinkedList<T> {
         if (this.head) {
             this.head.prev = node;
         }
+        if (!this.tail) {
+            this.tail = node;
+        }
         node.next = this.head;
         this.head = node;
         this._length++;
@@ -70,6 +76,8 @@ export class LinkedList<T> {
     insertNodeBefore(target: Node<T>, node: Node<T>) {
         if (target.prev) {
             target.prev.next = node;
+        } else {
+            this.head = node;
         }
         node.prev = target.prev;
         node.next = target;
@@ -85,6 +93,8 @@ export class LinkedList<T> {
     insertNodeAfter(target: Node<T>, node: Node<T>) {
         if (target.next) {
             target.next.prev = node;
+        } else {
+            this.tail = node;
         }
         node.next = target.next;
         node.prev = target;
@@ -102,6 +112,7 @@ export class LinkedList<T> {
         let node = this.head;
         while(node !== null) {
             yield node;
+            node = node.next;
         }
     }
 

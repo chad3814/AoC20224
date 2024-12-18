@@ -97,15 +97,4 @@ for (const arg of args) {
     if (arg === '2') options.onlyPart = 2;
 }
 
-run(__filename, solve, options, {
-    reason: "Multiple examples",
-    part1length: 1,
-    inputs: {
-        selector: "code",
-        indexes: [4, 4]
-    },
-    answers: {
-        selector: "code",
-        indexesOrLiterals: [15, 22]
-    }
-});
+run(__filename, solve, options);

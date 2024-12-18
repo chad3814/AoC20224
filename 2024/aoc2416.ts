@@ -33,33 +33,16 @@ export async function solve(
     }
 
     const points = new Set<Point>();
-    let node = previous.get(end);
-    if (!node) {
-        console.log(`uh oh the end isn't in the previous map`);
-        throw new Error('map error');
-    }
-    while (node !== start) {
+    const queue = [end];
+    while (queue.length > 0) {
+        const node = queue.shift()!;
         points.add(node.point);
-        node = previous.get(node!);
-        if (!node) {
-            console.log('no previous');
-            throw new Error('map error');
+        if (node === start) break;
+        const prevs = previous.get(node);
+        if (!prevs) {
+            throw new Error('missing previous array');
         }
-    }
-
-    const {distances: revDists, previous: revPrev} = dijkstra(maze, end, start);
-    node = revPrev.get(start);
-    if (!node) {
-        console.log('missing revPrev start');
-        throw new Error();
-    }
-    while (node !== end) {
-        points.add(node.point);
-        node = revPrev.get(node!);
-        if (!node) {
-            console.log('no revPrev');
-            throw new Error();
-        }
+        queue.push(...prevs);
     }
 
     return points.size;

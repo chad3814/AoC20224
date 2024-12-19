@@ -214,6 +214,24 @@ export class LinkedList<T> {
         }
     }
 
+    mergeList(list: LinkedList<T>) {
+        if (!this.tail) {
+            this.head = list.head;
+            this.tail = list.tail;
+            this._length = list._length;
+        } else {
+            this.tail.next = list.head;
+            if (list.head) {
+                list.head.prev = this.tail;
+                this.tail = list.tail;
+            }
+            this._length += list._length;
+        }
+        list.head = this.head;
+        list.tail = this.tail;
+        list._length = this._length;
+    }
+
     findValue(item: T): Node<T>|null {
         for (const node of this) {
             if (node.value === item) return node;

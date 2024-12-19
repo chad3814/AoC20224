@@ -1,5 +1,5 @@
 import { Direction, DirectionOffset } from "./direction";
-import { LinkedList, llAppend, llAppendList, llDupe, makeLinkedList, Node } from "./list";
+import { LinkedList, Node } from "./list-class";
 
 export type GraphNode<T> = Omit<Node<T>, 'next'|'prev'|'linkedList'>  & {
     nodes: GraphNode<T>[];
@@ -132,7 +132,7 @@ type QueueElement<T> = {
 
 export function breadthFirstSearch<T>(node: GraphNode<T>, predicate: (node: GraphNode<T>, list: LinkedList<GraphNode<T>>) => boolean): LinkedList<GraphNode<T>>|null {
     const queue: QueueElement<T>[] = [{
-        list: makeLinkedList<GraphNode<T>>([]),
+        list: new LinkedList<GraphNode<T>>(),
         node,
     }];
 
@@ -143,11 +143,11 @@ export function breadthFirstSearch<T>(node: GraphNode<T>, predicate: (node: Grap
         }
         target.node.visited = true;
         if (predicate(target.node, target.list)) {
-            llAppend(target.list, target.node);
+            target.list.append(target.node);
             return target.list;
         }
-        const list = llDupe(target.list);
-        llAppend(list, target.node);
+        const list = target.list.dup();
+        list.append(target.node);
         for (const node of target.node.nodes) {
             queue.push({
                 list,
@@ -160,23 +160,23 @@ export function breadthFirstSearch<T>(node: GraphNode<T>, predicate: (node: Grap
 
 type GraphList<T> = LinkedList<GraphNode<T>>;
 export function depthFirstSearch<T>(node: GraphNode<T>, predicate: (node: GraphNode<T>, list: GraphList<T>) => boolean, list?: GraphList<T>): LinkedList<GraphList<T>> {
-    const lists: LinkedList<GraphList<T>> = makeLinkedList([]);
+    const lists: LinkedList<GraphList<T>> = new LinkedList<GraphList<T>>();
     if (!list) {
-        list = makeLinkedList<GraphNode<T>>([]);
+        list = new LinkedList<GraphNode<T>>();
     }
     node.visited = true;
     for (const target of node.nodes) {
         if (target.visited) {
             continue;
         }
-        const list2: GraphList<T> = llDupe(list);
-        llAppend(list2, target);
+        const list2: GraphList<T> = list.dup();
+        list2.append(target);
         if (predicate(target, list2)) {
-            llAppend(lists, list2)
+            lists.append(list2)
         }
         const targetLists = depthFirstSearch(target, predicate, list);
         target.visited = false;
-        llAppendList(lists, targetLists);
+        lists.appendList(targetLists);
     }
 
     return lists;

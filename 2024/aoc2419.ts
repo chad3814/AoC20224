@@ -1,4 +1,8 @@
 import { NotImplemented, run } from "aoc-copilot";
+import { match } from "assert";
+import { memoize } from "../utils/memoize";
+import { combos } from "../utils/combinations";
+import { take } from "../utils/take";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -16,23 +20,23 @@ function attempt(designs: string[], request: string): boolean {
     }
     return false;
 }
-
-function countSuccesses(designs: string[], request: string): number {
-    let count = 0;
-    const queue = [request];
-    while (queue.length > 0) {
-        const item = queue.shift()!;
+function getCount(designs: string[]) {
+    let _count: (request: string) => number;
+    function count(request: string): number {
+        let count = 0;
         for (const design of designs) {
-            if (design === item) {
-                count++;
-                continue;
+            if (request === '') {
+                return 1;
             }
-            if (item.startsWith(design)) {
-                queue.push(item.substring(design.length));
+            if (request.startsWith(design)) {
+                // console.log(design, 'matches', request, request.substring(design.length));
+                count += _count(request.substring(design.length));
             }
         }
+        return count;
     }
-    return count;
+    _count = memoize<void, [string], number>(1)(count);
+    return _count;
 }
 
 export async function solve(
@@ -59,8 +63,9 @@ export async function solve(
         }
     );
     let count = 0;
+    const countAll = getCount(designs);
     for (const request of requests) {
-        count += countSuccesses(designs, request);
+        count += countAll(request);
     }
     return count;
 }

@@ -1,5 +1,6 @@
 import { DefaultMap } from "./default-map";
 import { Direction, OppositeDirection } from "./direction";
+import { Heap, HeapNode } from "./heap";
 import { LinkedList } from "./list-class";
 import { Point } from "./point";
 
@@ -138,15 +139,25 @@ function getSmallest(unvisited: Set<MazeNode>, distances: DefaultMap<MazeNode, n
 export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: MazeNode) {
     const distances = new DefaultMap<MazeNode, number>(Number.POSITIVE_INFINITY);
     const unvisited = new Set<MazeNode>(nodes.values());
+    // const unvisited = new Heap<number, MazeNode>();
+    // const heapNodes = new Map<MazeNode, HeapNode<number, MazeNode>>();
+    // for (const node of nodes) {
+    //     heapNodes.set(node.value, unvisited.insert(Number.POSITIVE_INFINITY, node.value));
+    // }
     const previous = new Map<MazeNode, MazeNode[]>();
     distances.set(start, 0);
+    // unvisited.decreaseKey(heapNodes.get(start)!, 0);
     while (true) {
+        // const node = unvisited.extractMinimum()?.value;
+        // if (!node) {
+        //     throw new Error('failed to get a minimum node');
+        // }
         const node = getSmallest(unvisited, distances);
         const distance = distances.get(node);
         if (
             unvisited.size === 0 ||
             (end && node === end) ||
-            distances.get(node) === Number.POSITIVE_INFINITY
+            distance === Number.POSITIVE_INFINITY
         ) {
             return {distances, previous};
         }
@@ -155,12 +166,16 @@ export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: Maz
             const current = distances.get(exit.node);
             if (distance + exit.cost < current) {
                 distances.set(exit.node, distance + exit.cost);
+                // const heapNode = heapNodes.get(exit.node);
+                // if (!heapNode) {
+                //     throw new Error('something went wrong');
+                // }
+                // unvisited.decreaseKey(heapNode, distance + exit.cost);
                 previous.set(exit.node, [node]);
             } else if (distance + exit.cost === current) {
                 const prevs = previous.get(exit.node)!;
                 prevs.push(node);
             }
         }
-        unvisited.delete(node);
     }
 }

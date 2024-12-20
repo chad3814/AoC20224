@@ -2,7 +2,7 @@ export class EmptyListError extends Error {}
 export class WrongListError extends Error {}
 
 export class Node<T> {
-    constructor(public value: T, public readonly linkedList: LinkedList<T>) {
+    constructor(public value: T) {
         this.next = null;
         this.prev = null;
         this.visited = false;
@@ -30,7 +30,7 @@ export class LinkedList<T> {
     }
 
     append(value: T): Node<T> {
-        const node = new Node<T>(value, this);
+        const node = new Node<T>(value);
         this.appendNode(node);
         return node;
     }
@@ -49,7 +49,7 @@ export class LinkedList<T> {
     }
 
     prepend(value: T): Node<T> {
-        const node = new Node<T>(value, this);
+        const node = new Node<T>(value);
         this.prependNode(node);
         return node;
     }
@@ -68,7 +68,7 @@ export class LinkedList<T> {
     }
 
     insertBefore(target: Node<T>, value: T): Node<T> {
-        const node = new Node(value, this);
+        const node = new Node(value);
         this.insertNodeBefore(target, node);
         return node;
     }
@@ -86,7 +86,8 @@ export class LinkedList<T> {
     }
 
     insertAfter(target: Node<T>, value: T): Node<T> {
-        const node = new Node(value, this);
+        const node = new Node(value);
+        this.insertNodeAfter(target, node);
         return node;
     }
 
@@ -167,10 +168,6 @@ export class LinkedList<T> {
     }
 
     remove(node: Node<T>): number {
-        if (node.linkedList !== this) {
-            throw new WrongListError();
-        }
-
         if (node.prev) {
             node.prev.next = node.next;
         }

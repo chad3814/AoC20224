@@ -13,7 +13,7 @@ export type MazeNode = {
     }[];
 };
 
-function validPoint(grid: string[], point: Point): boolean {
+export function validMazePoint(grid: string[], point: Point): boolean {
     if (
         point.x < 0 ||
         point.y < 0 ||
@@ -51,7 +51,7 @@ export function parseWeightedMaze(lines: string[], impassable = '#'): LinkedList
             [Direction.WEST, Point.p(x - 1, y)]
         ] as [Direction, Point][]) {
             if (
-                validPoint(lines, point) &&
+                validMazePoint(lines, point) &&
                 lines[point.y][point.x] !== impassable
             ) {
                 const en = list.find(
@@ -109,7 +109,7 @@ export function parseUnweightedMaze(lines: string[], impassable = '#'): LinkedLi
             Point.p(x - 1, y)
         ]) {
             if (
-                validPoint(lines, point) &&
+                validMazePoint(lines, point) &&
                 lines[point.y][point.x] !== impassable
             ) {
                 const en = list.find(
@@ -130,9 +130,10 @@ export function parseUnweightedMaze(lines: string[], impassable = '#'): LinkedLi
 }
 
 function getSmallest(unvisited: Set<MazeNode>, distances: DefaultMap<MazeNode, number>): MazeNode {
-    return [...unvisited.keys()].sort(
+    const nodes = [...unvisited.keys()].sort(
         (a, b) => distances.get(a) - distances.get(b)
-    )[0];
+    );
+    return nodes[0];
 }
 
 export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: MazeNode) {
@@ -146,7 +147,7 @@ export function dijkstra(nodes: LinkedList<MazeNode>, start: MazeNode, end?: Maz
         if (
             unvisited.size === 0 ||
             (end && node === end) ||
-            distances.get(node) === Number.POSITIVE_INFINITY
+            distance === Number.POSITIVE_INFINITY
         ) {
             return {distances, previous};
         }

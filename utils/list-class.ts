@@ -38,8 +38,7 @@ export class LinkedList<T> {
     appendNode(node: Node<T>) {
         if (this.tail) {
             this.tail.next = node;
-        }
-        if (!this.head) {
+        } else {
             this.head = node;
         }
         node.prev =this.tail;
@@ -110,9 +109,14 @@ export class LinkedList<T> {
 
     * [Symbol.iterator](): Generator<Node<T>> {
         let node = this.head;
+        let last = node;
         while(node !== null) {
             yield node;
+            last = node;
             node = node.next;
+        }
+        if (last !== this.tail) {
+            throw new Error('iterator missed tail');
         }
     }
 
@@ -179,8 +183,10 @@ export class LinkedList<T> {
         }
         this._length--;
         if (this.head === node) {
-            this.head = null;
-            this.tail = null;
+            this.head = node.next;
+        }
+        if (this.tail === node) {
+            this.tail = node.prev;
         }
         return this.length;
     }

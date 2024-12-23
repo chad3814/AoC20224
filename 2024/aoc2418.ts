@@ -1,13 +1,12 @@
 import { NotImplemented, run } from "aoc-copilot";
 import { Point } from "../utils/point";
-import { dijkstra, MazeNode, parseUnweightedMaze } from "../utils/maze";
-import { LinkedList } from "../utils/list-class";
+import { dijkstra, Maze, MazeNode, parseUnweightedMaze } from "../utils/maze";
 
 type AdditionalInfo = {
     [key: string]: string;
 };
 
-function makeInput(size: number, points: Point[]): LinkedList<MazeNode> {
+function makeInput(size: number, points: Point[]): Maze {
     const memory: string[][] = [];
     for (let i = 0; i < size; i++) {
         memory.push('.'.repeat(size).split(''));

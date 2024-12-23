@@ -1,17 +1,24 @@
 import { DefaultMap } from "./default-map";
 import { Direction, OppositeDirection } from "./direction";
 import { LinkedList } from "./list-class";
-import { memoize } from "./memoize";
+import { Memoable, memoize } from "./memoize";
 import { Point } from "./point";
 
-export type MazeNode = {
-    facing: Direction;
-    value: string;
-    point: Point;
-    exits: {
+export class MazeNode implements Memoable {
+    constructor(
+        public value: string,
+        public readonly point: Point,
+        public facing: Direction = Direction.NORTH
+    ) {}
+
+    public exits: {
         node: MazeNode;
         cost: number;
-    }[];
+    }[] = [];
+
+    toMemo() {
+        return `{mz${this.point};${this.facing}}`;
+    }
 };
 
 export class Maze extends LinkedList<MazeNode> {
@@ -87,12 +94,7 @@ export class Maze extends LinkedList<MazeNode> {
                 const value = lines[y][x];
                 if (value === impassable) continue;
                 for(const facing of [Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST]) {
-                    const node: MazeNode = {
-                        facing,
-                        value,
-                        point: Point.p(x, y),
-                        exits: [],
-                    };
+                    const node: MazeNode = new MazeNode(value, Point.p(x, y), facing);
                     this.append(node);
                 }
             }
@@ -145,12 +147,7 @@ export class Maze extends LinkedList<MazeNode> {
             for (let x = 0; x < lines[y].length; x++) {
                 const value = lines[y][x];
                 if (value === impassable) continue;
-                const node: MazeNode = {
-                    facing: Direction.NORTH,
-                    value,
-                    point: Point.p(x, y),
-                    exits: [],
-                };
+                const node: MazeNode = new MazeNode(value, Point.p(x, y));
                 this.append(node);
             }
         }

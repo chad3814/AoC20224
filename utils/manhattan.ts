@@ -1,3 +1,4 @@
+import { memoize } from "./memoize";
 import { Point } from "./point";
 
 export function* manhattanPoints(
@@ -24,6 +25,4 @@ export function* manhattanPoints(
     }
 }
 
-export function manhattanDistance(a: Point, b: Point): number {
-    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
-}
+export const manhattanDistance = memoize<void, [Point, Point], number>(2)((a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y));

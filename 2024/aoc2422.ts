@@ -31,18 +31,21 @@ export async function solve(
         seeds.push(Number(line));
     }
 
+    const secrets: number[][] = [];
+    for (const seed of seeds) {
+        let last = seed;
+        const secs: number[] = [];
+        for(let i = 0; i < 2000; i++) {
+            last = parseInt(nextSecret(last), 10);
+            secs.push(last);
+        }
+        secrets.push(secs);
+    }
+
     if (part === 1) {
-        return seeds.map(
-            seed => {
-                let last = seed;
-                for(let i = 0; i < 2000; i++)
-                    last = parseInt(nextSecret(last), 10);
-                // console.log(seed, '=>', last);
-                return last;
-            }
-        ).reduce(
-            (t, a) => t + BigInt(a), 0n
-        );
+        return secrets.reduce(
+            (t, a) => t + BigInt(a[a.length - 1]), 0n
+        )
     }
     throw new NotImplemented('Not Implemented');
 }

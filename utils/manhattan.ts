@@ -25,4 +25,4 @@ export function* manhattanPoints(
     }
 }
 
-export const manhattanDistance = memoize<void, [Point, Point], number>(2)((a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y));
+export const manhattanDistance = (a: Point, b: Point): number => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);

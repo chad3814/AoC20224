@@ -36,6 +36,7 @@ export class Maze extends LinkedList<MazeNode> {
         )?.value ?? null;
     }
 
+    @memoize(1)
     validPoint(point: Point): boolean {
         if (
             point.x < 0 ||
@@ -46,6 +47,7 @@ export class Maze extends LinkedList<MazeNode> {
         return true;
     }
 
+    @memoize(2)
     dijkstra(start: MazeNode, end?: MazeNode) {
         const distances = new DefaultMap<MazeNode, number>(Number.POSITIVE_INFINITY);
         const unvisited = new Set<MazeNode>(this.values());

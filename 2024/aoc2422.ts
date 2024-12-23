@@ -1,5 +1,6 @@
 import { NotImplemented, run } from "aoc-copilot";
 import { memoize } from "../utils/memoize";
+import { inspect } from "util";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -16,7 +17,6 @@ const nextSecret = memoize<void, [number], string>(1)((current: number): string 
     const r3 = big << 11n;
     big ^= r3;
     big %= 1n << 24n;
-    // console.log(current, '=>', big);
     return big.toString();
 });
 
@@ -34,7 +34,7 @@ export async function solve(
     const secrets: number[][] = [];
     for (const seed of seeds) {
         let last = seed;
-        const secs: number[] = [];
+        const secs: number[] = [seed];
         for(let i = 0; i < 2000; i++) {
             last = parseInt(nextSecret(last), 10);
             secs.push(last);
@@ -47,7 +47,43 @@ export async function solve(
             (t, a) => t + BigInt(a[a.length - 1]), 0n
         )
     }
-    throw new NotImplemented('Not Implemented');
+
+    const bids: number[][] = [];
+    // this maps four changes in a string like `-1,2,-5,8` to an
+    // index in bids for each monkey, -1 if that change doesn't happen
+    const changeMap = new Map<string, number[]>();
+    for (let monkey = 0; monkey < seeds.length; monkey++) {
+        bids.push(secrets[monkey].map(s => s % 10));
+        const changes: number[] = [];
+        for (let bidNum = 1; bidNum < bids[monkey].length; bidNum++) {
+            changes.push(bids[monkey][bidNum] - bids[monkey][bidNum - 1]);
+        }
+        for (let i = 4; i < changes.length; i++) {
+            const key = `${changes[i - 4]},${changes[i - 3]},${changes[i - 2]},${changes[i - 1]}`;
+            const existing = changeMap.get(key) ?? [];
+            if (existing.length -1 === monkey) {
+                // this key has already occured for this monkey, skip
+                continue;
+            }
+            for (let m = existing.length; m < monkey; m++) {
+                existing.push(0);
+            }
+            existing.push(bids[monkey][i]);
+            changeMap.set(key, existing);
+        }
+    }
+
+    let max = 0;
+    let maxChange = '';
+    for (const [change, bananas] of changeMap.entries()) {
+        const totalBananas = bananas.reduce((t, a) => t + a, 0);
+        if (totalBananas > max) {
+            max = totalBananas;
+            maxChange = change;
+        }
+    }
+
+    return max;
 }
 
 type AocCopilotOptions = {

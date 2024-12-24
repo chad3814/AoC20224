@@ -3,8 +3,7 @@ import { dijkstra, MazeNode, parseUnweightedMaze, validMazePoint } from "../util
 import { Point } from "../utils/point";
 import { LinkedList, Node } from "../utils/list-class";
 import { DefaultMap } from "../utils/default-map";
-import { start } from "repl";
-import { manhattanPoints } from "../utils/manhattan";
+import { manhattanDistance } from "../utils/manhattan";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -124,50 +123,6 @@ function findCheat(
     }
 }
 
-function twentyByTwenty(
-    maze: LinkedList<MazeNode>,
-    pathPoint: Point,
-    centerPoint: Point,
-    input: string[],
-    distances: DefaultMap<MazeNode, number>,
-    minCheat: number,
-    cheats: Map<string, number>,
-) {
-    const startNode = maze.head!;
-    const baseDist = distances.get(startNode.value);
-    for (let deltaY = -20; deltaY < 20; deltaY++) {
-        for (let deltaX = -20; deltaX < 20; deltaX++) {
-            const wallDist = Math.abs(deltaX) + Math.abs(deltaY);
-            if (wallDist > 20) break;
-            const point = Point.p(pathPoint.x + deltaX, pathPoint.y + deltaY);
-            if (!validMazePoint(input, point)) continue;
-            if (input[point.y][point.x] !== '#') {
-                let node: Node<MazeNode> | null = startNode;
-                while (node !== null && node.value.point !== point) {
-                    node = node.next;
-                }
-                if (node != null) {
-                    // a node further down the original solve path
-                    const sDist = distances.get(node.value);
-                    const cheatDist = baseDist + wallDist;
-                    const cheat = sDist - cheatDist;
-                    if (cheat > minCheat) {
-                        console.log('found a potential cheat of', cheat, 'from', startNode.value.point, 'to', node.value.point);
-                        const key = `${centerPoint}-${point}`;
-                        const existingDist = cheats.get(key);
-                        if (!existingDist || cheat > existingDist) {
-                            console.log('setting cheat', key, cheat);
-                            cheats.set(key, cheat);
-                        } else {
-                            console.log(`didn't set ${key}, ${cheat}; existing: ${existingDist}`);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 export async function solve(
     input: string[],
     part: number,
@@ -193,7 +148,7 @@ export async function solve(
     if (max == null) {
         throw new Error('no end');
     }
-    console.log('max is:', max);
+    // console.log('max is:', max);
     const pathNodes = new LinkedList<MazeNode>();
     let node = end;
     while (node !== start) {
@@ -201,7 +156,7 @@ export async function solve(
         node = previous.get(node)![0];
     }
     pathNodes.prepend(start);
-    console.log('path nodes:', pathNodes.length);
+    // console.log('path nodes:', pathNodes.length);
     const minCheatSize = test ? (part === 2 ? 49 : 0) : 99;
     const maxCheats = part === 1 ? 1 : 19;
 
@@ -222,46 +177,30 @@ export async function solve(
             );
         }
     } else {
+        // different tact:
+        // for each node on the path, check if each subsequent node is within 20
+        // if so, check the savings and increment if appropriate
+        let cheatCount = 0;
         for (const path of pathNodes) {
-            const pathPoint = path.value.point;
-            // for (const adjacent of pathPoint.adjacentPoints(input[0].length, input.length)) {
-            //     if (input[adjacent.y][adjacent.x] === '#') {
-            //         twentyByTwenty(
-            //             maze,
-            //             pathPoint,
-            //             adjacent,
-            //             input,
-            //             distances,
-            //             minCheatSize,
-            //             cheats
-            //         );
-            //     }
-            // }
-            for (const point of manhattanPoints(20, pathPoint, input[0].length - 1, input.length - 1)) {
-                if (input[point.y][point.x] === '#') {
+            let laterNode = path.next;
+            while (laterNode !== null) {
+                const wallSize = manhattanDistance(path.value.point, laterNode.value.point);
+                if (wallSize > 20) {
+                    laterNode = laterNode.next;
                     continue;
                 }
-                const node = maze.getNode(point);
-                if (!node) {
-                    console.log(point, input[point.y][point.x]);
-                    throw new Error('failed to find cheat exit node');
-                }
-                const wallSize = Math.abs(point.x - pathPoint.x) + Math.abs(point.y - pathPoint.y);
-                const oldDist = distances.get(node);
+                const oldDist = distances.get(laterNode.value);
                 const newDist = distances.get(path.value) + wallSize;
                 const cheat = oldDist - newDist;
-                const key = `${pathPoint}-${point}`;
-                if (cheat > minCheatSize && cheat > cheats.get(key)) {
-                    cheats.set(key, cheat);
+                if (cheat > minCheatSize) {
+                    cheatCount++;
                 }
+                laterNode = laterNode.next;
             }
         }
+        return cheatCount;
     }
-    // for (const [path, cheat] of cheats.entries()) {
-    //     if (path.startsWith('(1, 4)')) {
-    //         console.log(path, '=>', cheat);
-    //     }
-    // }
+
     const map = new DefaultMap<number, number>(0);
     const keys = [...cheats.entries()].filter(
         ([k, v]) => v === Number.POSITIVE_INFINITY

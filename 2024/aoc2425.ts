@@ -1,4 +1,4 @@
-import { NotImplemented, run } from "aoc-copilot";
+import { NotImplemented, run, logger } from "aoc-copilot";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -17,40 +17,46 @@ export async function solve(
     const locks: KeyLock[] = [];
     for (let i = 0; i < input.length; i++) {
         const isKey = input[i][0] === '.';
-        const grid: string[][] = new Array<string[]>(5);
-        grid.forEach((_, i) => grid[i] = new Array<string>(7).fill('*'));
+        const lines: string[] = [];
         for (let j = 0; j < 7; j++, i++) {
-            console.log('line:', input[i]);
-            for (let k = 4; k >= 0; k--) {
-                grid[k][j] = input[i][j];
-                console.log('k:', k, 'j:', j, 'i:', i, 'grid:', grid[k][j], 'input:', input[i][j]);
-            }
+            lines.push(input[i]);
         }
-        console.log('grid:', grid);
         if (isKey) {
-            keys.push(grid.reduce(
-                (total: KeyLock, tooth: string[]) => {
-                    let i = 0;
-                    while (i < 5 && tooth[i] === '.') i++;
-                    total.push(5-i as KeyLockNum);
-                    return total;
-                }, [] as unknown as KeyLock)
-            );
+            const key: KeyLock = [0, 0, 0, 0, 0];
+            for (let col = 0; col < 5; col++) {
+                for (let row = 0; row < 7; row++) {
+                    if (lines[row][col] === '#') {
+                        key[col] = row as KeyLockNum;
+                        break;
+                    }
+                }
+            }
+            keys.push(key);
         } else {
-            locks.push(grid.reduce(
-                (total: KeyLock, tooth: string[]) => {
-                    let i = 0;
-                    while (i < 5 && tooth[i] === '#') i++;
-                    total.push(5-i as KeyLockNum);
-                    return total;
-                }, [] as unknown as KeyLock)
-            );
+            const lock: KeyLock = [0, 0, 0, 0, 0];
+            for (let col = 0; col < 5; col++) {
+                for (let row = 0; row < 7; row++) {
+                    if (lines[row][col] === '.') {
+                        lock[col] = row as KeyLockNum;
+                        break;
+                    }
+                }
+            }
+            locks.push(lock);
         }
     }
     if (part === 1) {
-        console.log('keys:', keys);
-        console.log('locks:', locks);
-        throw new NotImplemented('Not Implemented');
+        logger.log('keys:', keys);
+        logger.log('locks:', locks);
+        let count = 0;
+        for (const key of keys) {
+            for (const lock of locks) {
+                if (lock.every(
+                    (tumbler, index) => tumbler <= key[index]
+                )) count++;
+            }
+        }
+        return count;
     }
     throw new NotImplemented('Not Implemented');
 }

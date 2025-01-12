@@ -16,12 +16,14 @@ export class MazeNode implements Memoable {
         cost: number;
     }[] = [];
 
+    public visited = false;
+
     toMemo() {
         return `{mz${this.point};${this.facing}}`;
     }
 };
 
-export class Maze extends LinkedList<MazeNode> {
+export class Maze extends LinkedList<MazeNode> implements Memoable {
     get width() { return this._width; }
     get height() { return this._height; }
 
@@ -29,6 +31,7 @@ export class Maze extends LinkedList<MazeNode> {
         super();
         this._height = lines.length;
         this._width = lines[0].length;
+        this._isWeighted = weighted;
 
         if (weighted)
             this.parseWeighted(lines, impassable);
@@ -85,8 +88,44 @@ export class Maze extends LinkedList<MazeNode> {
         }
     }
 
+    @memoize(2)
+    reverseDijkstra(start: MazeNode, end?: MazeNode) {
+        const distances = new DefaultMap<MazeNode, number>(Number.NEGATIVE_INFINITY);
+        const unvisited = new Set<MazeNode>(this.values());
+        const previous = new Map<MazeNode, MazeNode[]>();
+        distances.set(start, 0);
+        while (true) {
+            const node = getLargest(unvisited, distances);
+            const distance = distances.get(node);
+            if (
+                unvisited.size === 0 ||
+                (end && node === end) ||
+                distance === Number.NEGATIVE_INFINITY
+            ) {
+                return {distances, previous};
+            }
+
+            for (const exit of node.exits) {
+                const current = distances.get(exit.node);
+                if (distance + exit.cost > current) {
+                    distances.set(exit.node, distance + exit.cost);
+                    previous.set(exit.node, [node]);
+                } else if (distance + exit.cost === current) {
+                    const prevs = previous.get(exit.node)!;
+                    prevs.push(node);
+                }
+            }
+            unvisited.delete(node);
+        }
+    }
+
+    public toMemo(): string {
+        return `m{${this.width},${this.height},${this.length},${this._isWeighted},[${this.head?.value.toMemo()},${this.tail?.value.toMemo()}]}`;
+    }
+
     private _width: number;
     private _height: number;
+    private _isWeighted: boolean;
 
     private parseWeighted(lines: string[], impassable: string) {
         for (let y = 0; y < lines.length; y++) {
@@ -202,6 +241,13 @@ export function parseUnweightedMaze(lines: string[], impassable = '#'): Maze {
 function getSmallest(unvisited: Set<MazeNode>, distances: DefaultMap<MazeNode, number>): MazeNode {
     const nodes = [...unvisited.keys()].sort(
         (a, b) => distances.get(a) - distances.get(b)
+    );
+    return nodes[0];
+}
+
+function getLargest(unvisited: Set<MazeNode>, distances: DefaultMap<MazeNode, number>): MazeNode {
+    const nodes = [...unvisited.keys()].sort(
+        (a, b) => distances.get(b) - distances.get(a)
     );
     return nodes[0];
 }

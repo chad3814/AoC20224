@@ -10,10 +10,19 @@ export async function solve(
     test: boolean,
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
-    if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+    const steps = input.map(Number);
+    let count = 0;
+    let position = 0;
+    while (position >= 0 && position < steps.length) {
+        count++;
+        const move = steps[position];
+        steps[position]++;
+        if (part === 2 && move >= 3) {
+            steps[position] -= 2;
+        }
+        position += move;
     }
-    throw new NotImplemented('Not Implemented');
+    return count;
 }
 
 run(__filename, solve);

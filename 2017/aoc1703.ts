@@ -1,4 +1,6 @@
 import { NotImplemented, run, logger } from "aoc-copilot";
+import { Direction, DirectionOffset, dLeft, turnLeft } from "../utils/direction";
+import { Point } from "../utils/point";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -97,7 +99,58 @@ export async function solve(
         logger.log('lineDist:', lineDist, 'center:', center, 'centerDist:', centerDist);
         return lineDist + centerDist;
     }
-    throw new NotImplemented('Not Implemented');
+    /*
+        147 142 133 122  59
+        304   5   4   2  57
+        330  10   1   1  54
+        351  11  23  25  26
+        362 747 806 880 931 957
+
+    */
+    const grid = new Map<Point, number>();
+    grid.set(Point.p(0, 0),1);
+    let dir: Direction = Direction.SOUTH;
+    let x = 0;
+    let y = 0;
+    let nextVal = -1;
+    do {
+        let nextCell = Point.p(x + DirectionOffset[dir][0], y + DirectionOffset[dir][1]);
+        const left = Point.p(nextCell.x + DirectionOffset[turnLeft(dir)][0], nextCell.y + DirectionOffset[turnLeft(dir)][1]);
+        if (!grid.has(left)) {
+            dir = turnLeft(dir);
+            const potential = Point.p(x + DirectionOffset[dir][0], y + DirectionOffset[dir][1]);
+            if (!grid.has(potential)) {
+                nextCell = potential;
+            } // else it stays
+        }
+        logger.log('nextCell:', nextCell);
+        nextVal = 0;
+        for (const adj of nextCell.adjacentPoints(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, true)) {
+            logger.log('adj:', adj, grid.get(adj) ?? 0);
+            nextVal += grid.get(adj) ?? 0;
+        }
+        grid.set(nextCell, nextVal);
+        x = nextCell.x;
+        y = nextCell.y;
+        logger.log('nextVal:', nextVal);
+    } while (nextVal <= cell);
+    return nextVal;
 }
 
-run(__filename, solve);
+run(__filename, solve, undefined, undefined, [
+    {
+        part: 2,
+        inputs: ["950"],
+        answer: "957"
+    },
+    {
+        part: 2,
+        inputs: ["25"],
+        answer: "26"
+    },
+    {
+        part: 2,
+        inputs: ["300"],
+        answer: "304"
+    }
+]);

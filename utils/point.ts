@@ -7,13 +7,29 @@ export class Point {
         return p;
     }
 
-    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0): Point[] {
+    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0, includeDiagonals = false): Point[] {
         const points: Point[] = [];
         if (this.x > minX) {
             points.push(Point.p(this.x - 1, this.y));
+            if (includeDiagonals) {
+                if (this.y > minY) {
+                    points.push(Point.p(this.x - 1, this.y - 1));
+                }
+                if (this.y < maxY) {
+                    points.push(Point.p(this.x - 1, this.y + 1));
+                }
+            }
         }
         if (this.x < maxX) {
             points.push(Point.p(this.x + 1, this.y));
+            if (includeDiagonals) {
+                if (this.y > minY) {
+                    points.push(Point.p(this.x + 1, this.y - 1));
+                }
+                if (this.y < maxY) {
+                    points.push(Point.p(this.x + 1, this.y + 1));
+                }
+            }
         }
         if (this.y > minY) {
             points.push(Point.p(this.x, this.y - 1));

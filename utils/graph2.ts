@@ -1,6 +1,7 @@
+import { DefaultMap } from "./default-map";
 import { Direction, Turn } from "./direction";
 import { memoize } from "./memoize";
-import { Path, Point } from "./point";
+import { Path, Point, PointLike } from "./point";
 
 function getTurns(p1: Point, p2: Point, p3: Point): Turn[] {
     if (p1.x === p2.x && p2.x === p3.x) {
@@ -34,8 +35,10 @@ function getTurns(p1: Point, p2: Point, p3: Point): Turn[] {
     return dir1 === Direction.RIGHT ? [Turn.RIGHT, Turn.STRAIGHT] : [Turn.LEFT, Turn.STRAIGHT];
 }
 
-export class Graph {
-    constructor(input: string[] | string[][], private passable = '.', private impassable = '#') {
+type PointImplementer<T extends PointLike> = (x: number, y: number) => T;
+
+export class Graph<P extends PointImplementer<PointLike>> {
+    constructor(input: string[] | string[][], private newPoint: P, private passable = '.', private impassable = '#') {
         for (let y = 0; y < input.length; y++) {
             const row: string[] = [];
             for (let x = 0; x < input[y].length; x++) {
@@ -43,7 +46,7 @@ export class Graph {
                 row.push(cell);
                 if (cell !== passable && cell !== impassable) {
                     const points = this.poi.get(cell) ?? [];
-                    points.push(Point.p(x, y));
+                    points.push(newPoint(x, y));
                     this.poi.set(cell, points);
                 }
             }
@@ -57,8 +60,8 @@ export class Graph {
         return new Map(this.poi.entries());
     }
 
-    @memoize()
-    public allPaths(p1: Point, p2: Point, visited: Set<Point> = new Set()): Path[] {
+    @memoize(3)
+    public allPaths(p1: PointLike, p2: PointLike, visited: Set<PointLike> = new Set()): Path[] {
         const paths: Path[] = [];
         if (p1 === p2) {
             return [[p2]];
@@ -77,6 +80,59 @@ export class Graph {
         }
         visited.delete(p1);
         return paths;
+    }
+
+    @memoize<Graph<P>, [PointLike, PointLike], Path|null>(2)
+    public dijkstra(p1: PointLike, p2: PointLike): Path|null {
+        const distances = new DefaultMap<PointLike, number>(Number.POSITIVE_INFINITY);
+        const unvisited = new Set<PointLike>();
+        for (let row = 0; row < this.height; row++) {
+            for (let col = 0; col < this.width; col++) {
+                unvisited.add(this.newPoint(col, row));
+            }
+        }
+        const previous = new Map<PointLike, PointLike[]>();
+        distances.set(p1, 0);
+        while (true) {
+            const node = [...unvisited.keys()].sort(
+                (a, b) => distances.get(a) - distances.get(b)
+            )[0];
+            const distance = distances.get(node);
+
+            if (distance === Number.POSITIVE_INFINITY) {
+                // no path from p1 to p2
+                return null;
+            }
+
+            if (
+                unvisited.size === 0 ||
+                node === p2
+            ) {
+                const path: Path = [];
+                let n = node;
+                while(n !== p1) {
+                    const prev = previous.get(n);
+                    if (!prev) {
+                        throw new Error('previous missing');
+                    }
+                    path.unshift(n);
+                    n = prev[0];
+                }
+                return path;
+            }
+
+            for (const exit of node.adjacentPoints(this.width, this.height)) {
+                const current = distances.get(exit);
+                if (distance + 1 < current) {
+                    distances.set(exit, distance + 1);
+                    previous.set(exit, [node]);
+                } else if (distance + 1 === current) {
+                    const prevs = previous.get(exit)!;
+                    prevs.push(node);
+                }
+            }
+            unvisited.delete(node);
+        }
     }
 
     print(valueMap: (value: string, p: Point)=>string = v=>v): void {

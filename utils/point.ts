@@ -1,13 +1,20 @@
-export class Point {
-    public static p(x: number, y: number) {
+export interface PointLike {
+    x: number;
+    y: number;
+    adjacentPoints: (maxX: number, maxY: number, minX?: number, minY?: number, includeDiagonals?: boolean) => PointLike[];
+    toString: () => string;
+};
+
+export class Point implements PointLike {
+    public static p(x: number, y: number): PointLike {
         let p = this.points.get(`${x}-${y}`);
         if (p) return p;
-        p = new Point(x, y);
+        p = new this(x, y);
         this.points.set(`${x}-${y}`, p);
         return p;
     }
 
-    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0, includeDiagonals = false): Point[] {
+    public adjacentPoints(maxX: number, maxY: number, minX = 0, minY = 0, includeDiagonals = false): PointLike[] {
         const points: Point[] = [];
         if (this.x > minX) {
             points.push(Point.p(this.x - 1, this.y));
@@ -45,8 +52,8 @@ export class Point {
         return `(${this.x}, ${this.y})`;
     }
 
-    private constructor(public readonly x: number, public readonly y: number) {}
-    private static points: Map<string, Point> = new Map<string, Point>();
+    protected constructor(public readonly x: number, public readonly y: number) {}
+    private static points: Map<string, PointLike> = new Map<string, PointLike>();
 }
 
-export type Path = Point[];
+export type Path = PointLike[];

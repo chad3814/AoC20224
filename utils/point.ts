@@ -53,7 +53,7 @@ export class Point implements PointLike {
     }
 
     protected constructor(public readonly x: number, public readonly y: number) {}
-    private static points: Map<string, PointLike> = new Map<string, PointLike>();
+    protected static points: Map<string, PointLike> = new Map<string, PointLike>();
 }
 
 export type Path = PointLike[];

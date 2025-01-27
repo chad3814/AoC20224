@@ -52,12 +52,17 @@ export class HexPoint extends Point {
     }
 }
 
-const HexP = HexPoint.p;
+const HexP = (x: number, y: number) => HexPoint.p(x, y);
 export function emptyHexGraph(rows: number, cols: number) {
     const field: string[] = [];
     for (let y = 0; y < rows; y++) {
         const s = (y + 1) % 2;
-        field.push('.'.repeat(cols - s));
+        const line = '.#'.repeat(cols - s);
+        if (s === 1) {
+            field.push('#' + line);
+        } else {
+            field.push(line);
+        }
     }
     return new Graph(field, HexP);
 }

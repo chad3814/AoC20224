@@ -98,6 +98,7 @@ export class Graph<P extends PointImplementer<PointLike>> {
                 (a, b) => distances.get(a) - distances.get(b)
             )[0];
             const distance = distances.get(node);
+            console.log('shortest unvisited:', node, distance);
 
             if (distance === Number.POSITIVE_INFINITY) {
                 // no path from p1 to p2
@@ -135,11 +136,11 @@ export class Graph<P extends PointImplementer<PointLike>> {
         }
     }
 
-    print(valueMap: (value: string, p: Point)=>string = v=>v): void {
+    print(valueMap: (value: string, p: PointLike)=>string = v=>v): void {
         for (let y = 0; y < this.grid.length; y++) {
             const line: string[] = [];
             for (let x = 0; x < this.grid[y].length; x++) {
-                line.push(valueMap(this.grid[y][x], Point.p(x, y)));
+                line.push(valueMap(this.grid[y][x], this.newPoint(x, y)));
             }
             console.log(line.join(''));
         }

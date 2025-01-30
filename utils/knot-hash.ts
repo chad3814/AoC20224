@@ -13,9 +13,12 @@ export function twist(loop: number[], lengths: number[], p = 0, skip = 0) {
     return {p, skip};
 }
 
-export function calculateKnotHash(lengths: number[], loopSize = 256): string {
+export function calculateKnotHash(lengthStr: string): string {
+    const lengths = lengthStr.split('').map(c => c.charCodeAt(0));
+    lengths.push(17, 31, 73, 47, 23);
+
     const loop: number[] = [];
-    for (let i = 0; i < loopSize; i++) {
+    for (let i = 0; i < 256; i++) {
         loop[i] = i;
     }
 

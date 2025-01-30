@@ -22,9 +22,8 @@ export async function solve(
         twist(loop, lengths);
         return loop[0] * loop[1];
     }
-    const lengths = input[0].split('').map(c => c.charCodeAt(0));
-    lengths.push(17, 31, 73, 47, 23);
-    return calculateKnotHash(lengths);
+
+    return calculateKnotHash(input[0]);
 }
 
 run(__filename, solve);

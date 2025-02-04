@@ -6,7 +6,19 @@ export interface PointLike {
 };
 
 export class Point implements PointLike {
-    public static p(x: number, y: number): PointLike {
+    public static p(pos: [number, number]): PointLike;
+    public static p(x: number, y: number): PointLike;
+    public static p(xOrPos: number|[number, number], y?: number): PointLike {
+        let x: number;
+        if (Array.isArray(xOrPos)) {
+            x = xOrPos[0];
+            y = xOrPos[1];
+        } else {
+            if (y == null) {
+                throw new Error('Invalid signature');
+            }
+            x = xOrPos as number;
+        }
         let p = this.points.get(`${x}-${y}`);
         if (p) return p;
         p = new this(x, y);

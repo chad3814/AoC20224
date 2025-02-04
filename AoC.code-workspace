@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "${HOME}/.config/AoC-Copilot"
+		}
+	],
+	"settings": {}
+}

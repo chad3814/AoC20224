@@ -1,4 +1,6 @@
-import { NotImplemented, Options, run } from "aoc-copilot";
+import { logger, NotImplemented, Options, run } from "aoc-copilot";
+import { Point } from "../utils/point";
+import { NumericDefaultMap } from "../utils/default-map";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -10,10 +12,59 @@ export async function solve(
     test: boolean,
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
+    const houseCounts = new NumericDefaultMap<Point>(0);
     if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+        let x = 0;
+        let y = 0;
+        // deliver first present
+        houseCounts.increment(Point.p(x, y));
+        for (const direction of input[0]) {
+            switch (direction) {
+                case '<': x--;
+                    break;
+                case '>': x++;
+                    break;
+                case 'v': y++;
+                    break;
+                case '^': y--;
+                    break;
+            }
+            houseCounts.increment(Point.p(x, y));
+        }
+    } else {
+        const positions: [number, number][] = [
+            [0, 0], // Santa
+            [0, 0], // Robo-Santa
+        ];
+        let santasTurn = true;
+
+        // deliver first present
+        houseCounts.increment(Point.p(positions[0]));
+        houseCounts.increment(Point.p(positions[1]));
+
+        for (const direction of input[0]) {
+            const index = santasTurn ? 0 : 1;
+            const position = positions[index];
+            switch (direction) {
+                case '<': position[0]--;
+                    logger.log(santasTurn ? 'Santa' : 'Robo-Santa', 'moves west');
+                    break;
+                case '>': position[0]++;
+                    logger.log(santasTurn ? 'Santa' : 'Robo-Santa', 'moves east');
+                    break;
+                case 'v': position[1]++;
+                    logger.log(santasTurn ? 'Santa' : 'Robo-Santa', 'moves south');
+                    break;
+                case '^': position[1]--;
+                    logger.log(santasTurn ? 'Santa' : 'Robo-Santa', 'moves north');
+                    break;
+            }
+            houseCounts.increment(Point.p(position));
+            logger.log(santasTurn ? 'Santa' : 'Robo-Santa', 'delivers at', position);
+            santasTurn = !santasTurn;
+        }
     }
-    throw new NotImplemented('Not Implemented');
+    return houseCounts.size;
 }
 
 const options: Options = {};

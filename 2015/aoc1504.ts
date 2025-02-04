@@ -1,4 +1,5 @@
 import { NotImplemented, Options, run } from "aoc-copilot";
+import { createHash } from "node:crypto";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -10,10 +11,37 @@ export async function solve(
     test: boolean,
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
-    if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+    let i = 1;
+    let done = false;
+    while (!done) {
+        const hasher = createHash('MD5');
+        hasher.update(input[0]);
+        hasher.update(i.toString(10));
+        const hash = hasher.digest().toString('hex');
+        if (
+            part === 1 &&
+            hash[0] === '0' &&
+            hash[1] === '0' &&
+            hash[2] === '0' &&
+            hash[3] === '0' &&
+            hash[4] === '0'
+        ) {
+            return i;
+        }
+        if (
+            part === 2 &&
+            hash[0] === '0' &&
+            hash[1] === '0' &&
+            hash[2] === '0' &&
+            hash[3] === '0' &&
+            hash[4] === '0' &&
+            hash[5] === '0'
+        ) {
+            return i;
+        }
+        i++;
     }
-    throw new NotImplemented('Not Implemented');
+    throw new Error('should not reach');
 }
 
 const options: Options = {};

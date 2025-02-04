@@ -10,10 +10,21 @@ export async function solve(
     test: boolean,
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
-    if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+    let floor = 0;
+    let index = Number.MAX_SAFE_INTEGER;
+    for (let i = 0; i < input[0].length; i++) {
+        const c = input[0][i];
+        if (c === '(') floor++;
+        if (c === ')') floor--;
+        if (floor < 0 && i < index) {
+            index = i + 1;
+        }
     }
-    throw new NotImplemented('Not Implemented');
+
+    if (part === 1) {
+        return floor;
+    }
+    return index;
 }
 
 const options: Options = {};

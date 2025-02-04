@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../../.config/AoC-Copilot"
+			"path": "${HOME}/.config/AoC-Copilot"
 		}
 	],
 	"settings": {}

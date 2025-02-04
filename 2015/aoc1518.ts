@@ -1,4 +1,4 @@
-import { NotImplemented, run } from "aoc-copilot";
+import { NotImplemented, Options, run } from "aoc-copilot";
 
 type AdditionalInfo = {
     [key: string]: string;
@@ -16,4 +16,13 @@ export async function solve(
     throw new NotImplemented('Not Implemented');
 }
 
-run(__filename, solve);
+const options: Options = {};
+const args: string[] = process.argv.splice(2);
+for (const arg of args) {
+    if (arg === '-t') options.testsOnly = true;
+    if (arg === '-s') options.skipTests = true;
+    if (arg === '1') options.onlyPart = 1;
+    if (arg === '2') options.onlyPart = 2;
+}
+
+run(__filename, solve, options);

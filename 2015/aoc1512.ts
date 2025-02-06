@@ -4,16 +4,44 @@ type AdditionalInfo = {
     [key: string]: string;
 };
 
+type Json = string | number | {
+    [key: string]: Json
+} | Json[];
+
+function* numbers(obj: Json, skipRed = false): Generator<number> {
+    if (typeof obj === 'number') {
+        yield obj;
+        return;
+    }
+    if (Array.isArray(obj)) {
+        for (const o of obj as Json[]) {
+            yield * numbers(o, skipRed);
+        }
+        return;
+    }
+    if (typeof obj === 'string') return;
+    if (skipRed) {
+        if ([...Object.values(obj)].some(
+            o => o === 'red'
+        )) return;
+    }
+    for (const o of Object.values(obj)) {
+        yield * numbers(o, skipRed);
+    }
+}
+
 export async function solve(
     input: string[],
     part: number,
     test: boolean,
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
-    if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+    const json = JSON.parse(input.join(''));
+    let total = 0;
+    for (const num of numbers(json, part === 2)) {
+        total += num;
     }
-    throw new NotImplemented('Not Implemented');
+    return total;
 }
 
 const options: Options = {};

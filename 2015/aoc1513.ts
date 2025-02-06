@@ -45,7 +45,23 @@ export async function solve(
     if (part === 1) {
         return Math.max(...[...permutations([...personMap.values()])].map(p => happyScore(p)));
     }
-    throw new NotImplemented('Not Implemented');
+    const you: Person = {
+        name: 'you',
+        nextTo: {}
+    };
+    for (const [name, person] of personMap.entries()) {
+        you.nextTo[name] = 0;
+        person.nextTo['you'] = 0;
+    }
+    let max = 0;
+    for (const permutation of permutations([...personMap.values()])) {
+        for (let i = 0; i < permutation.length; i++) {
+            const seats = permutation.slice();
+            seats.splice(i, 0 , you);
+            max = Math.max(max, happyScore(seats));
+        }
+    }
+    return max;
 }
 
 const options: Options = {};

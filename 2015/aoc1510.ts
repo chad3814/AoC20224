@@ -4,6 +4,25 @@ type AdditionalInfo = {
     [key: string]: string;
 };
 
+function transform(digits: string): string {
+    let last = '';
+    let lastIdx = -1;
+    let str = '';
+    for (let i = 0; i < digits.length; i++) {
+        if (last !== digits[i]) {
+            if (last !== '') {
+                str += (i - lastIdx) + digits[lastIdx];
+            }
+            last = digits[i];
+            lastIdx = i;
+        }
+    }
+    str += (digits.length - lastIdx) + digits[lastIdx];
+    return str;
+}
+
+const CONWAY = 1.303577269034;
+
 export async function solve(
     input: string[],
     part: number,
@@ -11,9 +30,15 @@ export async function solve(
     additionalInfo?: AdditionalInfo,
 ): Promise<string | number> {
     if (part === 1) {
-        throw new NotImplemented('Not Implemented');
+        let digits = input[0];
+        for (let i = 0; i < 40; i++) digits = transform(digits);
+        return digits.length;
+        // let len = input[0].length;
+        // return Math.round(len * CONWAY ** 39);
     }
-    throw new NotImplemented('Not Implemented');
+    let digits = input[0];
+    for (let i = 0; i < 50; i++) digits = transform(digits);
+    return digits.length;
 }
 
 const options: Options = {};
